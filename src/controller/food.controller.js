@@ -70,17 +70,26 @@ async function getProfile(req, res){
 }
 
 async function getDashboard(req, res){
-    const {email} = req.query;
     try {
-        const foodpartner = await partnerModel.find({email});
-        const foodData = await foodModel.find({foodPartner:foodpartner[0]._id});
+        const partnerDocument = req.foodPartner
+
+        if (!partnerDocument) {
+            return res.status(401).json({
+                message: 'Partner authentication required',
+            })
+        }
+
+        const partnerPayload = partnerDocument.toObject ? partnerDocument.toObject() : partnerDocument
+        const foodData = await foodModel.find({ foodPartner: partnerPayload._id })
+
         res.status(200).json({
-            foodpartner,
-            foodData
+            foodpartner: [partnerPayload],
+            foodData,
         })
     } catch (err) {
-        return res.status(401).json({
-            message: "user not found"
+        console.error('load partner dashboard failed', err)
+        return res.status(500).json({
+            message: 'Unable to load partner dashboard',
         })
     }
 }
