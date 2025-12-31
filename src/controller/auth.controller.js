@@ -5,6 +5,13 @@ const bcrypt = require('bcrypt');
 const storageService = require('../services/storage.services.js')
 const { v4: uuid } = require('uuid');
 
+const cookieOptions = {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+}
+
 const registerUser = async (req, res) => {
     const {fullName, email, password} = req.body;
 
@@ -30,7 +37,7 @@ const registerUser = async (req, res) => {
         id: user._id
     }, process.env.JWT_SECRET);
 
-    res.cookie("token", token);
+    res.cookie("token", token, cookieOptions);
     res.status(201).json({
         message: "user created succfully",
         user: {
@@ -64,7 +71,7 @@ const loginUser = async (req, res) => {
         id: User._id 
     },process.env.JWT_SECRET);
 
-    res.cookie("token", token);
+    res.cookie("token", token, cookieOptions);
 
     res.status(200).json({
         message: "User login successfully",
@@ -77,7 +84,11 @@ const loginUser = async (req, res) => {
 }
 
 const logoutUser = (req, res)=>{
-    res.clearCookie("token")
+    res.clearCookie("token", {
+        httpOnly: cookieOptions.httpOnly,
+        sameSite: cookieOptions.sameSite,
+        secure: cookieOptions.secure,
+    })
     res.status(200).json({
         message: "logout successfully."
     })
@@ -118,7 +129,7 @@ const registerFoodPartner = async (req, res) => {
 
         const token = jwt.sign({ id: partner._id }, process.env.JWT_SECRET);
 
-        res.cookie('token', token);
+        res.cookie('token', token, cookieOptions);
         res.status(201).json({
             message: 'Food partner created successfully.',
             user: {
@@ -152,7 +163,7 @@ const loginFoodPartner = async (req, res) => {
         id:user._id
     }, process.env.JWT_SECRET);
 
-    res.cookie("token", token);
+    res.cookie("token", token, cookieOptions);
     res.status(200).json({
         message:"login successfully",
         user:{
@@ -163,10 +174,77 @@ const loginFoodPartner = async (req, res) => {
 }
 
 const logoutFoodPartner = (req, res) => {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+        httpOnly: cookieOptions.httpOnly,
+        sameSite: cookieOptions.sameSite,
+        secure: cookieOptions.secure,
+    });
     res.status(200).json({
         message: "logout successfully"
     })
+}
+
+const getCurrentSession = async (req, res) => {
+    const token = req.cookies?.token
+
+    if (!token) {
+        return res.status(200).json({
+            user: null,
+            accountType: null,
+        })
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+        const [user, partner] = await Promise.all([
+            userModel.findById(decoded.id).lean(),
+            foodPartnerModel.findById(decoded.id).lean(),
+        ])
+
+        if (user) {
+            const { _id, email, fullNmae, name } = user
+            return res.status(200).json({
+                user: {
+                    id: _id,
+                    email,
+                    fullName: fullNmae || name || '',
+                },
+                accountType: 'user',
+            })
+        }
+
+        if (partner) {
+            const { _id, email, fullName, contactName, phone, address, avatar } = partner
+            return res.status(200).json({
+                user: {
+                    id: _id,
+                    email,
+                    fullName,
+                    contactName,
+                    phone,
+                    address,
+                    avatar,
+                },
+                accountType: 'partner',
+            })
+        }
+
+        return res.status(200).json({
+            user: null,
+            accountType: null,
+        })
+    } catch (error) {
+        res.clearCookie('token', {
+            httpOnly: cookieOptions.httpOnly,
+            sameSite: cookieOptions.sameSite,
+            secure: cookieOptions.secure,
+        })
+        return res.status(200).json({
+            user: null,
+            accountType: null,
+        })
+    }
 }
 
 module.exports = {
@@ -175,5 +253,6 @@ module.exports = {
     logoutUser,
     registerFoodPartner,
     loginFoodPartner,
-    logoutFoodPartner
+    logoutFoodPartner,
+    getCurrentSession
 }; 

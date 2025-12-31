@@ -24,5 +24,6 @@ router.post('/user/logout', authController.logoutUser);
 router.post('/partner/register', upload.single('avatar'), authController.registerFoodPartner);
 router.post('/partner/login', authController.loginFoodPartner);
 router.post('/partner/logout', authController.logoutFoodPartner);
+router.get('/me', authController.getCurrentSession);
 
 module.exports = router;
