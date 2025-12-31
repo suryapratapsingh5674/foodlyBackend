@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin:"https://foodly-frontend-brown.vercel.app/",
+    origin:"https://foodly-frontend-brown.vercel.app",
     credentials: true
 }))
 
