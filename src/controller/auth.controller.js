@@ -37,15 +37,7 @@ const registerUser = async (req, res) => {
         id: user._id
     }, process.env.JWT_SECRET);
 
-<<<<<<< HEAD
     res.cookie("token", token, cookieOptions);
-=======
-    res.cookie("token", token,  {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-});
->>>>>>> c0ad6761e533de479277fe970e036139be4ccdae
     res.status(201).json({
         message: "user created succfully",
         user: {
@@ -79,15 +71,7 @@ const loginUser = async (req, res) => {
         id: User._id 
     },process.env.JWT_SECRET);
 
-<<<<<<< HEAD
     res.cookie("token", token, cookieOptions);
-=======
-    res.cookie("token", token,  {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-});
->>>>>>> c0ad6761e533de479277fe970e036139be4ccdae
 
     res.status(200).json({
         message: "User login successfully",
@@ -145,15 +129,7 @@ const registerFoodPartner = async (req, res) => {
 
         const token = jwt.sign({ id: partner._id }, process.env.JWT_SECRET);
 
-<<<<<<< HEAD
         res.cookie('token', token, cookieOptions);
-=======
-        res.cookie('token', token,  {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-});
->>>>>>> c0ad6761e533de479277fe970e036139be4ccdae
         res.status(201).json({
             message: 'Food partner created successfully.',
             user: {
@@ -187,15 +163,7 @@ const loginFoodPartner = async (req, res) => {
         id:user._id
     }, process.env.JWT_SECRET);
 
-<<<<<<< HEAD
     res.cookie("token", token, cookieOptions);
-=======
-    res.cookie("token", token,  {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-});
->>>>>>> c0ad6761e533de479277fe970e036139be4ccdae
     res.status(200).json({
         message:"login successfully",
         user:{
@@ -285,11 +253,6 @@ module.exports = {
     logoutUser,
     registerFoodPartner,
     loginFoodPartner,
-<<<<<<< HEAD
     logoutFoodPartner,
     getCurrentSession
 }; 
-=======
-    logoutFoodPartner
-}; 
->>>>>>> c0ad6761e533de479277fe970e036139be4ccdae
